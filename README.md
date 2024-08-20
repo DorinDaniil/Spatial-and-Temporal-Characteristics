@@ -16,5 +16,5 @@
 
 ## 🔎 Обзор
 <div align="center">
-  <img alt="overview" src="paper/figures/scheme.pdf">
+![overview](paper/figures/scheme.pdf)
 </div>
