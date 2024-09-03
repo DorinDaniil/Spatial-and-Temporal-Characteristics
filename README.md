@@ -3,9 +3,7 @@
 характеристики в задаче декодирования
 данных фМРТ </h1>
 
-[Даниил Дорин](https://github.com/DorinDaniil)<sup>1</sup>, [Андрей Грабовой](https://github.com/andriygav)<sup>1</sup>, [Вадим Стрижов](https://github.com/Strijov)<sup>1</sup>
-
-<sup>1</sup> Московский Физико-Технический Институт
+[Даниил Дорин](https://github.com/DorinDaniil), [Андрей Грабовой](https://github.com/andriygav), [Вадим Стрижов](https://github.com/Strijov)
 
 [📝 Paper](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/blob/main/paper/main.pdf), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code)
 </div>
