@@ -1,25 +1,46 @@
 <div align="center">
-<h1>Пространственно-временные
-характеристики в задаче декодирования
-данных фМРТ </h1>
+<h1>Enhancing fMRI Data Decoding with Spatio-Temporal
+Characteristics in Limited Dataset Approaches </h1>
 
-[Даниил Дорин](https://github.com/DorinDaniil), [Андрей Грабовой](https://github.com/andriygav), [Вадим Стрижов](https://github.com/Strijov)
+[Daniil Dorin](https://github.com/DorinDaniil)<sup>2 :email:</sup>, [Andrey Grabovoy](https://github.com/andriygav)<sup>2</sup>, [Vadim Strijov](https://github.com/Strijov)<sup>1</sup>
 
-[📝 Paper](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/blob/main/paper/main.pdf), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code)
+<sup>1</sup> Forecsys, Moscow, Russia
+
+<sup>2</sup> Antiplagiat Company, Moscow, Russia
+
+<sup>:email:</sup> Corresponding author
+
+[📝 Paper]()[</> Code](https://github.com/DorinDaniil/Forecasting-fMRI-Images/tree/main/code)
 </div>
 
-## 💡 Аннотация
-Исследуются пространственно-временные характеристики в задаче декодирования данных функциональной магнитно-резонансной томографии или фМРТ с дискретным представлением времени. Нейросетевые архитектуры не всегда подходят для работы с данными фМРТ из-за ограниченного объема данных, высокой индивидуальной вариабельности и необходимости значительных вычислительных ресурсов. Поэтому рассматривается подход, учитывающий особенности строения мозга каждого исследуемого объекта.
-Предложен метод снижения пространственной размерности временных рядов фМРТ, основанный на взвешивании стимулированных областей мозга с использованием кросс-корреляционной функции. На основе этого метода предложена модель классификации сегментов временных рядов фМРТ, использующая кодировщик с применением римановой геометрии для извлечения пространственно-временных характеристик. В вычислительном эксперименте проводится анализ предложенных методов на выборке, полученной при томографическом обследовании шести испытуемых. Проанализировано влияние отдельных компонент метода на качество классификации.
-
-## 🔎 Обзор
+## 💡 Abstract
+This study investigates the impact of spatio-temporal features on the quality of
+decoding functional Magnetic Resonance Imaging (fMRI) data with discrete time
+representation. Neural network architectures are limited in handling fMRI data
+due to the small data volume, high individual variability, and significant computa-
+tional resources required. Therefore, an approach considering the unique structural
+features of each subject’s brain is examined. The core objective is to evaluate the
+classification quality in the context of a small dataset, where the available data
+is insufficient for training neural networks effectively. A method for extracting a
+unique activity mask of the brain for each subject is proposed. It is based on reduc-
+ing the spatial dimensionality of fMRI time series through weighting stimulated
+brain regions using the cross-correlation function. A classification model for fMRI
+time series is developed, utilizing activity masks extracted using the mentioned
+method for each activity class and an encoder employing Riemannian geometry
+to extract spatio-temporal characteristics. The computational experiment analyzes
+the proposed methods on a sample obtained from tomographic examinations of
+6 subjects. An ablation analysis of the proposed classification method shows a
+significant decrease in quality when any component of the method is missing,
+highlighting the importance of the extracted features for high-quality fMRI data
+decoding.
+## 🔎 Overview
 <div align="center">
   
-![Overview](paper/figures/scheme.jpg)
+![Overview](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/blob/main/assets/scheme_english.pdf)
   
 </div>
 
-## 🛠️ Структура репозитория
-Репозиторий структурирован следующим образом:
-- `paper`: В директории содержится основной текст статьи в формате PDF (`main.pdf`) и исходный файл LaTeX (`main.tex`). Также здесь находится директория `figures` с изображениями, использованными в работе.
-- `code`: Директория содержит код, использованный в проекте.
+## 🛠️ Repository Structure
+The repository is structured as follows:
+- `assets`: The directory contains the main figures
+- `code`: The directory contains the code used in the project
