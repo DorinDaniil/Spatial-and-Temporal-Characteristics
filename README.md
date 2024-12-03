@@ -36,7 +36,7 @@ decoding.
 ## 🔎 Overview
 <div align="center">
   
-![Overview](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/blob/main/assets/scheme_english.pdf)
+![Overview](https://github.com/user-attachments/assets/623d60b4-7d77-4d5e-a095-6d6bdf9e70b7)
   
 </div>
 
