@@ -36,8 +36,8 @@ decoding.
 ## 🔎 Overview
 <div align="center">
   
-![Overview](https://github.com/user-attachments/assets/623d60b4-7d77-4d5e-a095-6d6bdf9e70b7)
-  
+![Overview](https://github.com/user-attachments/assets/e194210b-4c33-4f68-a912-eb6dc2d77cf1)
+
 </div>
 
 ## 🛠️ Repository Structure
