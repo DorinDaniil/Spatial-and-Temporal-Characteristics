@@ -4,9 +4,9 @@ Characteristics in Limited Dataset Approaches </h1>
 
 [Daniil Dorin](https://github.com/DorinDaniil)<sup>2 :email:</sup>, [Andrey Grabovoy](https://github.com/andriygav)<sup>2</sup>, [Vadim Strijov](https://github.com/Strijov)<sup>1</sup>
 
-<sup>1</sup> Forecsys, Moscow, Russia
+<sup>1</sup> Antiplagiat Company, Moscow, Russia
 
-<sup>2</sup> Antiplagiat Company, Moscow, Russia
+<sup>2</sup> Forecsys, Moscow, Russia
 
 <sup>:email:</sup> Corresponding author
 
