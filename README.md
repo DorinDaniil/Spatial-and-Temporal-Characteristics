@@ -10,7 +10,7 @@ Characteristics in Limited Dataset Approaches </h1>
 
 <sup>:email:</sup> Corresponding author
 
-[📝 Paper]()[</> Code](https://github.com/DorinDaniil/Forecasting-fMRI-Images/tree/main/code)
+[📝 Paper](), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code)
 </div>
 
 ## 💡 Abstract
