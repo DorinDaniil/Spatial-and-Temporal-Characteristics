@@ -11,6 +11,9 @@ Characteristics in Limited Dataset Approaches </h1>
 <sup>:email:</sup> Corresponding author
 
 [📝 Paper](), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code)
+
+![overview](https://github.com/user-attachments/assets/09233ad1-518e-484f-9ed0-11a2d79a1744)
+
 </div>
 
 ## 💡 Abstract
@@ -35,6 +38,8 @@ highlighting the importance of the extracted features for high-quality fMRI data
 decoding.
 ## 🔎 Overview
 <div align="center">
+  
+![scheme_english](https://github.com/user-attachments/assets/8a300875-9af6-41c4-b4ed-f8b0e5f6832f)
 
 </div>
 
