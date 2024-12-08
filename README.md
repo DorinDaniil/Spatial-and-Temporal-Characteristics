@@ -17,25 +17,7 @@ Characteristics in Limited Dataset Approaches </h1>
 </div>
 
 ## 💡 Abstract
-This study investigates the impact of spatio-temporal features on the quality of
-decoding functional Magnetic Resonance Imaging (fMRI) data with discrete time
-representation. Neural network architectures are limited in handling fMRI data
-due to the small data volume, high individual variability, and significant computa-
-tional resources required. Therefore, an approach considering the unique structural
-features of each subject’s brain is examined. The core objective is to evaluate the
-classification quality in the context of a small dataset, where the available data
-is insufficient for training neural networks effectively. A method for extracting a
-unique activity mask of the brain for each subject is proposed. It is based on reduc-
-ing the spatial dimensionality of fMRI time series through weighting stimulated
-brain regions using the cross-correlation function. A classification model for fMRI
-time series is developed, utilizing activity masks extracted using the mentioned
-method for each activity class and an encoder employing Riemannian geometry
-to extract spatio-temporal characteristics. The computational experiment analyzes
-the proposed methods on a sample obtained from tomographic examinations of
-6 subjects. An ablation analysis of the proposed classification method shows a
-significant decrease in quality when any component of the method is missing,
-highlighting the importance of the extracted features for high-quality fMRI data
-decoding.
+This study investigates the impact of spatio-temporal features on the quality of decoding functional Magnetic Resonance Imaging (fMRI) data. Neural network architectures are limited in handling fMRI data due to the small data volume, high individual variability, and significant computational resources required. This makes it a crucial task to find a method for decoding with an insufficient dataset. Therefore, an approach considering the unique structural features of each subject's brain is examined. To build a solution we propose method for extracting a unique activity mask of the brain for each subject is proposed. It is based on reducing the spatial dimensionality of fMRI time series through weighting stimulated brain regions using the cross-correlation function. A classification model for fMRI time series data is developed, incorporating activity masks extracted for each activity class using the mentioned method and an encoder that employs Riemannian geometry to extract spatio-temporal characteristics. The computational experiment analyzes the proposed methods on a sample obtained from tomographic examinations of 6 subjects. An ablation analysis of the proposed classification method shows a significant decrease in quality when any component of the method is missing, highlighting the importance of the extracted features for high-quality fMRI data decoding.
 ## 🔎 Overview
 <div align="center">
   
