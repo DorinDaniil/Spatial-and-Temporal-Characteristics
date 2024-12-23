@@ -1,6 +1,6 @@
 <div align="center">
 <h1>Enhancing fMRI Data Decoding with Spatio-Temporal
-Characteristics in Limited Dataset Approaches </h1>
+Characteristics in Limited Dataset </h1>
 
 [Daniil Dorin](https://github.com/DorinDaniil)<sup>1 :email:</sup>, [Andrey Grabovoy](https://github.com/andriygav)<sup>1</sup>, [Vadim Strijov](https://github.com/Strijov)<sup>2</sup>
 
