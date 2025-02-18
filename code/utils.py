@@ -44,3 +44,43 @@ def show_scan_slices(scan, dim_slices, mask=None, title='Masked fMRI scan slices
         plt.savefig(file_name)
 
     plt.show()
+
+
+
+def save_scan_slices(scan, dim_slices, mask=None, img_path='.'):
+    for dim, slice in enumerate(dim_slices):
+        fig, ax = plt.subplots(figsize=(5, 5))
+
+        if mask is None:
+            if dim == 0:
+                scan_slice = scan[slice, :, :].T
+            elif dim == 1:
+                scan_slice = scan[:, slice, :].T
+            elif dim == 2:
+                scan_slice = scan[:, :, slice].T
+        else:
+            if dim == 0:
+                scan_slice = scan[slice, :, :].T
+                scan_slice_masked = mask[slice, :, :].T
+            elif dim == 1:
+                scan_slice = scan[:, slice, :].T
+                scan_slice_masked = mask[:, slice, :].T
+            elif dim == 2:
+                scan_slice = scan[:, :, slice].T
+                scan_slice_masked = mask[:, :, slice].T
+
+        ax.imshow(scan_slice, cmap="gray", origin="lower")
+        ax.axis('off')  # Убираем оси
+
+        if mask is not None:
+            cmap = colors.ListedColormap(['black', 'red'])
+            ax.imshow(scan_slice_masked, cmap=cmap, origin="lower", alpha=0.5)
+
+        # Сохраняем каждый слайс отдельно
+        file_name = f"{img_path}/slice_dim{dim}_slice{slice}_masked.png"
+        os.makedirs(os.path.dirname(file_name), exist_ok=True)
+        plt.savefig(file_name, bbox_inches='tight', pad_inches=0, transparent=True, dpi=300)
+        plt.close(fig)  # Закрываем фигуру, чтобы не отображать её
+
+
+

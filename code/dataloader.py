@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import nibabel as nib
 import pandas as pd
+import numpy as np
+from nilearn.image import load_img
 from nilearn.datasets import fetch_haxby
 
 class HaxbyDataset:
@@ -50,3 +52,21 @@ class HaxbyDataset:
                 for ax in axes.ravel():
                     ax.axis("off")
         plt.show()
+
+def prepare_sub_data(num):
+    dataset = HaxbyDataset()
+    data_files = dataset.data_files
+    fmris, labels = dataset.get_sub_data(num)
+    class_dict = {'rest': 0, 'bottle': 1, 'cat': 2, 'chair': 3, 'face': 4, 'house': 5, 'scissors': 6, 'scrambledpix': 7, 'shoe': 8}
+
+    stimuli = np.array([class_dict[label] for label in labels['labels'].values])
+    fmris_transposed = fmris.transpose((3, 0, 1, 2))
+    vt_mask_filename = load_img(data_files.mask_vt[num-1])
+    vt_mask_tensor = load_mask_from_nifti(vt_mask_filename)
+    return fmris_transposed, stimuli, vt_mask_tensor
+
+
+def load_mask_from_nifti(nifti_image):
+    mask_data = nifti_image.get_fdata()
+    mask_tensor = np.where(mask_data > 0, 1, 0)
+    return mask_tensor

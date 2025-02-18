@@ -10,6 +10,14 @@ from sklearn.pipeline import make_pipeline
 from pyriemann.estimation import Covariances
 from typing import Tuple
 import numpy as np
+import torch.nn as nn
+import torch.optim as optim
+from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score, accuracy_score
+from nilearn.image import load_img
+from dataloader import HaxbyDataset
 
 
 def ExtractSegments(X: np.ndarray, s: np.ndarray, tau: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -453,3 +461,259 @@ class Encoder:
             new_X.append(prep_X)
         new_X = np.concatenate(new_X, axis=1)
         return new_X
+
+
+
+def get_results_for_sub(num, stat_test=True):
+    dataset = HaxbyDataset()
+    fmris, labels = dataset.get_sub_data(num)
+
+    class_dict = {'rest': 0, 'bottle': 1, 'cat': 2, 'chair': 3, 'face': 4, 'house': 5, 'scissors': 6, 'scrambledpix': 7, 'shoe': 8}
+    stimuli = np.array([class_dict[label] for label in labels['labels'].values])
+    fmris_transposed = fmris.transpose((3, 0, 1, 2))
+
+    X, s, y = ExtractSegments(fmris_transposed, stimuli, tau=19)
+    y=y-1
+
+    X = X.astype('float64')
+    s = s.astype('int')
+    X_train, X_test, s_train, _, y_train, y_test = train_test_split(X, s, y, test_size=0.20, random_state=42, stratify=y)
+    clf = Encoder(mu=2.5, k_s=4, Delta_t=0.0, h=10, stat_test=stat_test)
+    clf.fit(X_train, s_train, y_train)
+
+    X_ptrain = clf.transform(X_train)
+    X_ptest = clf.transform(X_test)
+
+    # 1. Logistic Regression
+    print("Logistic Regression")
+    lr = LogisticRegression(C=1e2, class_weight='balanced', random_state=42)
+    lr.fit(X_ptrain, y_train)
+    lr_pred = lr.predict(X_ptest)
+    macro_f1_logreg = f1_score(y_test, lr_pred, average='macro')
+    micro_f1_logreg = f1_score(y_test, lr_pred, average='micro')
+    acc_logreg = accuracy_score(y_test, lr_pred)
+    print(f"Macro-average F1-Score: {macro_f1_logreg:.4f}")
+    print(f"Micro-average F1-Score: {micro_f1_logreg:.4f}")
+    print(f"Accuracy: {acc_logreg:.4f}\n")
+
+    # 2. MLP
+    print("MLP")
+    clf = MLPClassifier(hidden_layer_sizes=(128, 128), max_iter=200, activation = 'logistic')
+    clf.fit(X_ptrain, y_train)
+
+    y_pred = clf.predict(X_ptest)
+    macro_f1_mlp = f1_score(y_test, y_pred, average='macro')
+    micro_f1_mlp = f1_score(y_test, y_pred, average='macro')
+    acc_mlp = accuracy_score(y_test, y_pred)
+    print(f"Macro-average F1-Score: {macro_f1_mlp:.4f}")
+    print(f"Micro-average F1-Score: {micro_f1_mlp:.4f}")
+    print(f"Accuracy: {acc_mlp:.4f}")
+
+    return macro_f1_logreg, micro_f1_logreg, acc_logreg, macro_f1_mlp, micro_f1_mlp, acc_mlp
+
+
+# Define the LSTM model
+class LSTMClassifier(nn.Module):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+        super(LSTMClassifier, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.layer_dim = layer_dim
+        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(x.device)
+        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).to(x.device)
+        out, _ = self.lstm(x, (h0, c0))
+        out = self.fc(out[:, -1, :])
+        return out
+
+# Define the Attention-based model
+class AttentionClassifier(nn.Module):
+    def __init__(self, input_dim, hidden_dim, attention_dim, output_dim):
+        super(AttentionClassifier, self).__init__()
+        self.hidden_dim = hidden_dim
+
+        # Linear transformation for input
+        self.linear_in = nn.Linear(input_dim, hidden_dim)
+
+        # Attention layer
+        self.attention = nn.Linear(hidden_dim, attention_dim)
+        self.attention_combine = nn.Linear(attention_dim, 1)
+
+        # Output layer
+        self.fc_output = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        # Linear transformation of input
+        x = self.linear_in(x)
+
+        # Apply attention mechanism
+        attn_weights = torch.softmax(self.attention_combine(torch.tanh(self.attention(x))), dim=1)
+        context = torch.sum(attn_weights * x, dim=1)
+
+        # Output layer
+        out = self.fc_output(context)
+
+        return out
+
+# Prepare the data
+def prepare_data(fmris, labels, mask):
+    class_dict = {'rest': 0, 'bottle': 1, 'cat': 2, 'chair': 3, 'face': 4, 'house': 5, 'scissors': 6, 'scrambledpix': 7, 'shoe': 8}
+    stimuli = np.array([class_dict[label] for label in labels['labels'].values])
+    fmris_transposed = fmris.transpose((3, 0, 1, 2))
+
+    # Segment the time series by stimuli classes
+    X, s, y = ExtractSegments(fmris_transposed, stimuli, tau=19)
+    y = y - 1
+
+    # Apply the mask to reduce dimensionality
+    masked_X = []
+    for segment in X:
+        segment_masked = segment * mask
+        segment_masked = segment_masked.reshape((segment_masked.shape[0], -1))
+        nonzero_voxels = np.where(mask.flatten() > 0)[0]
+        segment_masked = segment_masked[:, nonzero_voxels]
+        masked_X.append(segment_masked)
+
+    masked_X = np.array(masked_X)
+
+    return masked_X, y
+
+# Function to train LSTM model
+def train_lstm_model(subject_num, lr=1e-5, num_epochs=1):
+    # Load the data
+    class_dict = {'rest': 0, 'bottle': 1, 'cat': 2, 'chair': 3, 'face': 4, 'house': 5, 'scissors': 6, 'scrambledpix': 7, 'shoe': 8}
+    dataset = HaxbyDataset()
+    fmris, labels = dataset.get_sub_data(subject_num)
+    mask = load_img(dataset.data_files.mask_vt[subject_num-1]).get_fdata()
+
+    # Prepare the data
+    X, y = prepare_data(fmris, labels, mask)
+
+    # Ensure the data is numeric and properly shaped
+    X = np.array(X, dtype=np.float32)
+    y = np.array(y, dtype=np.int64)
+
+    # Reshape the data to (batch_size, sequence_length, input_dim)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+    # Convert data to PyTorch tensors
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.long)
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.long)
+
+    # Define the model, loss function, and optimizer
+    input_dim = X_train.shape[2]
+    hidden_dim = 128
+    layer_dim = 2
+    output_dim = len(class_dict)
+
+    model = LSTMClassifier(input_dim, hidden_dim, layer_dim, output_dim)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    # Train the model
+    for epoch in range(num_epochs):
+        model.train()
+        optimizer.zero_grad()
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+        loss.backward()
+        optimizer.step()
+
+        # Calculate training metrics
+        _, predicted_train = torch.max(outputs, 1)
+        train_accuracy = accuracy_score(y_train, predicted_train)
+        train_macro_f1 = f1_score(y_train, predicted_train, average='macro')
+        train_micro_f1 = f1_score(y_train, predicted_train, average='micro')
+
+        if (epoch+1) % 1 == 0:
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, '
+                  f'Train Accuracy: {train_accuracy:.4f}, Train Macro F1: {train_macro_f1:.4f}, '
+                  f'Train Micro F1: {train_micro_f1:.4f}')
+
+    # Evaluate the model
+    model.eval()
+    with torch.no_grad():
+        outputs = model(X_test)
+        _, predicted = torch.max(outputs, 1)
+        macro_f1 = f1_score(y_test, predicted, average='macro')
+        micro_f1 = f1_score(y_test, predicted, average='micro')
+        accuracy = accuracy_score(y_test, predicted)
+        print(f'Test Macro-average F1-Score: {macro_f1:.4f}')
+        print(f'Test Micro-average F1-Score: {micro_f1:.4f}')
+        print(f'Test Accuracy: {accuracy:.4f}')
+
+# Function to train Attention model
+def train_attention_model(subject_num, lr=1e-5, num_epochs=1):
+    # Load the data
+    class_dict = {'rest': 0, 'bottle': 1, 'cat': 2, 'chair': 3, 'face': 4, 'house': 5, 'scissors': 6, 'scrambledpix': 7, 'shoe': 8}
+    dataset = HaxbyDataset()
+    fmris, labels = dataset.get_sub_data(subject_num)
+    mask = load_img(dataset.data_files.mask_vt[subject_num-1]).get_fdata()
+
+    # Prepare the data
+    X, y = prepare_data(fmris, labels, mask)
+
+    # Ensure the data is numeric and properly shaped
+    X = np.array(X, dtype=np.float32)
+    y = np.array(y, dtype=np.int64)
+
+    # Reshape the data to (batch_size, sequence_length, input_dim)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+    # Convert data to PyTorch tensors
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.long)
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.long)
+
+    # Define the model, loss function, and optimizer
+    input_dim = X_train.shape[2]
+    hidden_dim = 128
+    attention_dim = 64  # Dimension of the attention layer
+    output_dim = len(class_dict)
+
+    model = AttentionClassifier(input_dim, hidden_dim, attention_dim, output_dim)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    # Train the model
+    for epoch in range(num_epochs):
+        model.train()
+        optimizer.zero_grad()
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+        loss.backward()
+        optimizer.step()
+
+        # Calculate training metrics
+        _, predicted_train = torch.max(outputs, 1)
+        train_accuracy = accuracy_score(y_train, predicted_train)
+        train_macro_f1 = f1_score(y_train, predicted_train, average='macro')
+        train_micro_f1 = f1_score(y_train, predicted_train, average='micro')
+
+        if (epoch+1) % 1 == 0:
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, '
+                  f'Train Accuracy: {train_accuracy:.4f}, Train Macro F1: {train_macro_f1:.4f}, '
+                  f'Train Micro F1: {train_micro_f1:.4f}')
+
+    # Evaluate the model
+    model.eval()
+    with torch.no_grad():
+        outputs = model(X_test)
+        _, predicted = torch.max(outputs, 1)
+        macro_f1 = f1_score(y_test, predicted, average='macro')
+        micro_f1 = f1_score(y_test, predicted, average='micro')
+        accuracy = accuracy_score(y_test, predicted)
+        print(f'Test Macro-average F1-Score: {macro_f1:.4f}')
+        print(f'Test Micro-average F1-Score: {micro_f1:.4f}')
+        print(f'Test Accuracy: {accuracy:.4f}')
