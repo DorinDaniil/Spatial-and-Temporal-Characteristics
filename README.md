@@ -12,16 +12,16 @@ Characteristics in Limited Dataset </h1>
 
 [📝 Paper](), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code)
 
-![Figure_1-1](https://github.com/user-attachments/assets/70f39ca6-3051-419f-9186-d08b34fab894)
+![Figure_1_page-0001](https://github.com/user-attachments/assets/b008f21a-467d-41c4-b652-b894c0d5617c)
 
 </div>
 
 ## 💡 Abstract
-This study investigates the impact of spatiotemporal features on the quality of the decoding of functional Magnetic Resonance Imaging (fMRI) data. Neural network architectures are limited in handling fMRI data due to the small sample size, high sample variability, and significant computational resources required. We have to find a methodology for fMRI decoding with an insufficient dataset. We examine the unique structural features of each subject’s brain. To build a decoding methodology, we propose a method for extracting a unique activity mask from the brain for each subject. This method reduces the spatial dimensionality of fMRI time series through weighting stimulated brain regions using cross-correlation. We developed a classification model for the fMRI time series data from a single subject. It combines two parts. The first part is the brain activity masks extracted for each activity class using the extraction method. The second part is an encoder that employs Riemannian geometry to extract spatiotemporal characteristics. The computational experiment analyzes the proposed method on a sample obtained from tomographic examinations of six subjects. An ablation analysis of the proposed classification method shows a significant decrease in quality when any component of the method is missing. It highlights the importance of extracted features for high-quality fMRI data decoding.
+This study investigates the impact of spatiotemporal characteristics on the quality of the decoding of functional Magnetic Resonance Imaging (fMRI) data. Neural network architectures are limited in handling fMRI data due to the small sample size, high sample variability, and significant computational resources required. We propose a methodology for fMRI decoding with an insufficient dataset. We examine the unique structural features of each subject’s brain. To build a decoding methodology, we propose a algorithm for extracting a unique activity mask from the brain for each subject. This algorithm reduces the spatial dimensionality of fMRI time series through weighting stimulated brain regions using cross-correlation. We developed a classification model for the fMRI time series data from a single subject. It combines two parts. The first part is the brain activity masks extracted for each activity class using the extraction algorithm. The second part is an encoder that employs Riemannian geometry to extract spatiotemporal characteristics. The computational experiment analyzes the proposed methodology on a sample obtained from tomographic examinations of six subjects. An ablation analysis of the proposed classification model shows a significant decrease in quality when any component of the model is missing. It highlights the importance of extracted spatiotemporal characteristics for high-quality fMRI data decoding.
 ## 🔎 Overview
 <div align="center">
 
-![Figure_2-1](https://github.com/user-attachments/assets/700f2814-b822-40f2-bfe0-3e381e147fe8)
+![Figure_2_page-0001](https://github.com/user-attachments/assets/43d419cb-fe7a-410d-8091-dd8d35398b6d)
 
 </div>
 
