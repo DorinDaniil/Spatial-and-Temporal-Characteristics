@@ -29,3 +29,8 @@ This study investigates the impact of spatiotemporal characteristics on the qual
 The repository is structured as follows:
 - `assets`: The directory contains the main figures
 - `code`: The directory contains the code used in the project
+
+## :fire: Contributing
+
+Feel free to contribute to this project by opening issues or submitting pull requests. Any feedback or suggestions for improvement are welcome.
+
