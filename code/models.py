@@ -181,11 +181,11 @@ def ccw(
 
 class Encoder:
     def __init__(
-        self, 
-        mu: float, 
-        k_s: int, 
-        Delta_t: float, 
-        h: int, 
+        self,
+        mu: float,
+        k_s: int,
+        Delta_t: float,
+        h: int,
         stat_test: bool = False
     ) -> None:
         """
@@ -221,13 +221,13 @@ class Encoder:
         return F.avg_pool3d(X, kernel_size=k_s)
 
     def _ccw(
-        self, 
-        X: np.ndarray, 
-        s: np.ndarray, 
-        mu: float, 
-        k_s: int, 
-        Delta_t: float, 
-        h: int, 
+        self,
+        X: np.ndarray,
+        s: np.ndarray,
+        mu: float,
+        k_s: int,
+        Delta_t: float,
+        h: int,
         stat_test: bool = True
     ) -> np.ndarray:
         """
@@ -271,7 +271,7 @@ class Encoder:
         M_c.view(-1)[top_h_indices] = 1
         if not stat_test:
             return M_c.numpy()
-        
+
         # 6. Perform statistical test and Holm's method
         if stat_test:
             p_values = np.zeros((X_prime_hat.shape[1], X_prime_hat.shape[2], X_prime_hat.shape[3]))
@@ -294,10 +294,10 @@ class Encoder:
         return M
 
     def fit_masks(
-                self, 
-                X: np.ndarray, 
-                s: np.ndarray, 
-                y: np.ndarray
+        self,
+        X: np.ndarray,
+        s: np.ndarray,
+        y: np.ndarray
     ) -> None:
         """
         Fits masks for each class.
@@ -317,12 +317,12 @@ class Encoder:
             X_cls = np.concatenate(X_cls, axis=0)
             delta_s = np.diff(bin_s)
             delta_X = np.diff(X_cls, axis=0)
-            self.masks[cls] = self._ccw(delta_X, delta_s, self.mu, self.k_s, self.Delta_t, self.h, self.stat_test)
-
+            mask = self._ccw(delta_X, delta_s, self.mu, self.k_s, self.Delta_t, self.h, self.stat_test)
+            self.masks[cls] = mask
 
     def _apply_cls_mask(
-        self, 
-        X: np.ndarray, 
+        self,
+        X: np.ndarray,
         cls: int
     ) -> np.ndarray:
         """
@@ -349,14 +349,14 @@ class Encoder:
         nonzero_voxels = np.where(self.masks[cls].flatten() > 0)
         masked_X = masked_X[:, :, nonzero_voxels]
 
-        masked_X = np.squeeze(masked_X) 
+        masked_X = np.squeeze(masked_X)
+        # Ensure masked_X has at least two dimensions before transposing
         masked_X = np.transpose(masked_X, (0, 2, 1))
         return masked_X
 
-
     def _binarize_rel_labels(
-        self, 
-        y: np.ndarray, 
+        self,
+        y: np.ndarray,
         cls: int
     ) -> np.ndarray:
         """
@@ -373,10 +373,9 @@ class Encoder:
         bin_y[np.where(y==cls)]=1
         return bin_y
 
-
     def _fit_tsm(
-        self, 
-        masked_X: np.ndarray, 
+        self,
+        masked_X: np.ndarray,
         bin_y: np.ndarray
     ) -> object:
         """
@@ -398,9 +397,9 @@ class Encoder:
 
 
     def fit(
-        self, 
-        X: np.ndarray, 
-        s: np.ndarray, 
+        self,
+        X: np.ndarray,
+        s: np.ndarray,
         y: np.ndarray
     ) -> None:
         """
@@ -414,7 +413,17 @@ class Encoder:
         self.fit_masks(X, s, y)
         self.preps = {}
         self.classes = np.unique(y)
+
+        # Check if all masks are zero
+        all_masks_zero = all(np.sum(mask) == 0 for mask in self.masks.values())
+        assert not all_masks_zero, "Error: All masks are zero, non-informative masks."
+
         for cls in np.unique(y):
+            if np.sum(self.masks[cls]) == 1:
+                continue
+            if np.sum(self.masks[cls]) == 0:
+                print(f"Skipping mask application for class {cls} due to empty mask.")
+                continue
             masked_X = self._apply_cls_mask(X, cls)
             bin_y = self._binarize_rel_labels(y, cls)
             prep = self._fit_tsm(masked_X, bin_y)
@@ -422,8 +431,8 @@ class Encoder:
 
 
     def transform_cls(
-        self, 
-        X: np.ndarray, 
+        self,
+        X: np.ndarray,
         cls: int
     ) -> np.ndarray:
         """
@@ -439,9 +448,9 @@ class Encoder:
         masked_X = self._apply_cls_mask(X, cls)
         prep_X = self.preps[cls].transform(masked_X)
         return prep_X
-    
+
     def transform(
-        self, 
+        self,
         X: np.ndarray
     ) -> np.ndarray:
         """
@@ -456,6 +465,10 @@ class Encoder:
         # Finally, get the embedding vectors
         new_X = []
         for cls in self.classes:
+            if np.sum(self.masks[cls]) == 1:
+                continue
+            if np.sum(self.masks[cls]) == 0:
+                continue
             masked_X = self._apply_cls_mask(X, cls)
             prep_X = self.preps[cls].transform(masked_X)
             new_X.append(prep_X)
@@ -463,8 +476,7 @@ class Encoder:
         return new_X
 
 
-
-def get_results_for_sub(num, stat_test=True):
+def get_results_for_sub(num, train_fraction=1.0, stat_test=True):
     dataset = HaxbyDataset()
     fmris, labels = dataset.get_sub_data(num)
 
@@ -473,11 +485,19 @@ def get_results_for_sub(num, stat_test=True):
     fmris_transposed = fmris.transpose((3, 0, 1, 2))
 
     X, s, y = ExtractSegments(fmris_transposed, stimuli, tau=19)
-    y=y-1
+    y = y - 1
 
     X = X.astype('float64')
     s = s.astype('int')
     X_train, X_test, s_train, _, y_train, y_test = train_test_split(X, s, y, test_size=0.20, random_state=42, stratify=y)
+
+    # Further split the training set based on train_fraction
+    if train_fraction < 1.0:
+        X_train, _, s_train, _, y_train, _ = train_test_split(X_train, s_train, y_train, train_size=train_fraction, random_state=42, stratify=y_train)
+        print(X_train.shape)
+    else:
+        print(X_train.shape)
+
     clf = Encoder(mu=2.5, k_s=4, Delta_t=0.0, h=10, stat_test=stat_test)
     clf.fit(X_train, s_train, y_train)
 
@@ -498,19 +518,18 @@ def get_results_for_sub(num, stat_test=True):
 
     # 2. MLP
     print("MLP")
-    clf = MLPClassifier(hidden_layer_sizes=(128, 128), max_iter=200, activation = 'logistic')
+    clf = MLPClassifier(hidden_layer_sizes=(128, 128), max_iter=200, activation='logistic')
     clf.fit(X_ptrain, y_train)
 
     y_pred = clf.predict(X_ptest)
     macro_f1_mlp = f1_score(y_test, y_pred, average='macro')
-    micro_f1_mlp = f1_score(y_test, y_pred, average='macro')
+    micro_f1_mlp = f1_score(y_test, y_pred, average='micro')
     acc_mlp = accuracy_score(y_test, y_pred)
     print(f"Macro-average F1-Score: {macro_f1_mlp:.4f}")
     print(f"Micro-average F1-Score: {micro_f1_mlp:.4f}")
     print(f"Accuracy: {acc_mlp:.4f}")
 
     return macro_f1_logreg, micro_f1_logreg, acc_logreg, macro_f1_mlp, micro_f1_mlp, acc_mlp
-
 
 # Define the LSTM model
 class LSTMClassifier(nn.Module):
