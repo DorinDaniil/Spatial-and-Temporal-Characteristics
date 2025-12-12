@@ -10,7 +10,8 @@ Characteristics in Limited Dataset </h1>
 
 <sup>:email:</sup> Corresponding author
 
-[📝 Paper](https://www.mathnet.ru/php/archive.phtml?wshow=paper&jrnid=danma&paperid=664&option_lang=eng), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code)
+[📝 Paper](https://www.mathnet.ru/php/archive.phtml?wshow=paper&jrnid=danma&paperid=664&option_lang=eng), [</> Code](https://github.com/DorinDaniil/Spatial-and-Temporal-Characteristics/tree/main/code), [🎬 Video](https://drive.google.com/file/d/13XwQ1Vhpog0QV_kDNLxPBhvNRJp__8BN/view?usp=sharing), [🎫 Poster]()
+
 
 ![Figure_1_page-0001](https://github.com/user-attachments/assets/b008f21a-467d-41c4-b652-b894c0d5617c)
 
