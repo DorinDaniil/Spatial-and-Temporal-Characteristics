@@ -35,3 +35,15 @@ The repository is structured as follows:
 
 Feel free to contribute to this project by opening issues or submitting pull requests. Any feedback or suggestions for improvement are welcome.
 
+## 📚 Citation
+```BibTeX
+@article{dorin2025enhancing,
+  title={Enhancing fMRI data decoding with spatiotemporal characteristics in limited dataset},
+  author={Dorin, Daniil Dmitrievich and Grabovoy, Andrey Valerievich and Strijov, Vadim},
+  journal={Doklady Rossijskoj Akademii Nauk. Mathematika, Informatika, Processy Upravlenia},
+  volume={527},
+  pages={11--30},
+  year={2025},
+  publisher={Russian Academy of Sciences}
+}
+
