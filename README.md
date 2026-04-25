@@ -47,3 +47,14 @@ Feel free to contribute to this project by opening issues or submitting pull req
   publisher={Russian Academy of Sciences}
 }
 
+@inproceedings{dorin2025pairwise,
+  title={Pairwise image matching for plagiarism detection},
+  author={Dorin, Daniil Dmitrievich and Varlamova, KD and Grabovoy, Andrey Valerievich},
+  booktitle={Doklady Mathematics},
+  volume={112},
+  number={2},
+  pages={370--381},
+  year={2025},
+  organization={Springer}
+}
+
